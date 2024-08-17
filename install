@@ -37,9 +37,9 @@ install_nodejs_from_official() {
     exit 1
   fi
 
-  wget "https://nodejs.org/dist/latest-v18.x/node-v18.17.1-$NODE_DISTRO.tar.xz"
-  tar -C /usr/local --strip-components 1 -xJf "node-v18.17.1-$NODE_DISTRO.tar.xz"
-  rm "node-v18.17.1-$NODE_DISTRO.tar.xz"
+  wget "https://nodejs.org/dist/v20.16.0/node-v20.16.0-$NODE_DISTRO.tar.xz"
+  tar -C /usr/local --strip-components 1 -xJf "node-v20.16.0-$NODE_DISTRO.tar.xz"
+  rm "node-v20.16.0-$NODE_DISTRO.tar.xz"
   echo "Node.js 安装完成。"
 }
 
