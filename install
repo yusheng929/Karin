@@ -122,7 +122,7 @@ else
   mkdir -p "$install_dir/Karin"
   cd "$install_dir/Karin"
   pnpm i node-karin && npx init || { npm config set registry https://registry.npmmirror.com; pnpm i node-karin && npx init; }
-  curl -o "$install_dir/Karin.sh" https://install.karin.fun/karin
+  curl -o "$install_dir/Karin/Karin.sh" https://install.karin.fun/karin
   bash -c "echo 'cd $install_dir/Karin && bash Karin.sh' > /usr/local/bin/y"
   chmod +x /usr/local/bin/y
   echo "Karin安装完成"
