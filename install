@@ -93,7 +93,7 @@ if [ -d "$install_dir/Karin" ] && [ -f "$install_dir/Karin/package.json" ]; then
   read -p "当前目录已安装Karin，是否直接启动(Yes/no): " start_choice </dev/tty
   start_choice=${start_choice:-Yes}
   if [[ "$start_choice" =~ ^[Yy](es)?$ ]]; then
-    curl -o "$install_dir/Karin.sh" https://install.karin.fun/karin
+    curl -o "$install_dir/Karin/Karin.sh" https://install.karin.fun/karin
     bash -c "echo 'cd $install_dir/Karin && bash Karin.sh' > /usr/local/bin/y"
     chmod +x /usr/local/bin/y
     echo "Karin管理脚本已安装完毕，快捷键为 y。"
