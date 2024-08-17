@@ -63,7 +63,7 @@ else
   install_nodejs_from_official
 fi
 
-read -p "请输入一个目录用作安装目录 (默认安装到 /root目录下): " install_dir
+read -p "请输入一个目录用作安装目录 (默认安装到 /root目录下): " install_dir </dev/tty
 install_dir=${install_dir:-/root}
 
 if [ -d "$install_dir/Karin" ] && [ -f "$install_dir/Karin/package.json" ]; then
