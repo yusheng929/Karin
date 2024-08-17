@@ -43,7 +43,7 @@ install_nodejs_from_official() {
   echo "Node.js 安装完成。"
 }
 
-dependencies=("wget" "git" "ffmpeg" "dialog")
+dependencies=("wget" "git" "ffmpeg" "dialog" "tmux")
 
 for dep in "${dependencies[@]}"; do
   check_command $dep || install_package $dep
