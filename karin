@@ -1,0 +1,254 @@
+CURRENT_DATETIME=$(date +"%Y-%m-%d %H:%M:%S")
+
+URL="https://github.com"
+GHURL="https://mirror.ghproxy.com"
+
+function menu() {
+  while true; do
+    CHOICE=$(dialog \
+      --clear \
+      --backtitle "作者: 瑜笙  $CURRENT_DATETIME" \
+      --title "Karin 管理菜单" \
+      --menu "请选择操作" \
+      25 35 5 \
+      1 "启动 Karin" \
+      2 "停止 Karin" \
+      3 "打开 Karin" \
+      4 "打开 puppeteer 菜单" \
+      5 "插件管理" \
+      6 "退出" \
+      3>&1 1>&2 2>&3)
+
+    case $CHOICE in
+      1) start_karin ;;
+      2) stop_karin ;;
+      3) open_karin ;;
+      4) puppeteer_menu ;;
+      5) plugins_menu ;;
+      6) exit 0 ;;
+      *) ;;
+    esac
+  done
+}
+function puppeteer_menu() {
+  dialog --title "Karin 管理菜单" \
+                    --msgbox "puppeteer正在重构中，先咕咕咕" 6 40 \
+                    2>&1 > /dev/tty
+}
+function plugins_menu() {
+  while true; do
+    CHOICE=$(dialog \
+      --clear \
+      --backtitle "作者: 瑜笙  $CURRENT_DATETIME" \
+      --title "Karin 插件管理菜单" \
+      --menu "请选择操作" \
+      25 35 5 \
+      1 "安装Git插件" \
+      2 "安装JS插件" \
+      3 "全部更新" \
+      4 "删除Git插件" \
+      5 "删除JS插件" \
+      6 "返回" \
+      3>&1 1>&2 2>&3)
+
+    case $CHOICE in
+      1) plugin_list ;;
+      2) install_plugin_js ;;
+      3) update_all ;;
+      4) delete_plugin ;;
+      5) delete_plugin_js ;;
+      6) menu ;;
+      *) ;;
+    esac
+  done
+}
+function start_karin() {
+    if pgrep -x "Karin" > /dev/null; then
+                dialog --title "Karin 管理菜单" \
+                    --yesno "Karin已经在运行状态，是否打开？" 6 40 \
+                    2>&1 > /dev/tty
+                if [ $? -eq 0 ]; then
+                    tmux attach-session -t karin
+                fi
+            else
+                tmux kill-session -t karin 2>/dev/null
+                tmux new-session -s karin 'bash -c "while true; do pm2 kill; npx karin .; done"'
+            fi
+}
+function stop_karin() {
+    if pgrep -x "Karin" > /dev/null; then
+                tmux kill-session -t karin
+                if [ $? -eq 0 ]; then
+                    dialog --title "Karin 管理菜单" \
+                        --msgbox "已关闭Karin项目" 6 40 \
+                        2>&1 > /dev/tty
+                else
+                    dialog --title "错误" \
+                        --msgbox "关闭Karin项目时发生错误" 6 40 \
+                        2>&1 > /dev/tty
+                fi
+            else
+                dialog --title "Karin 管理菜单" \
+                    --msgbox "Karin项目已处于关闭状态" 6 40 \
+                    2>&1 > /dev/tty
+            fi
+}
+function open_karin() {
+    if pgrep -x "Karin" > /dev/null; then
+                tmux attach-session -t karin
+            else
+                dialog --title "Karin 管理菜单" \
+                    --yesno "Karin项目处于关闭状态，是否启动？" 6 40 \
+                    2>&1 > /dev/tty
+                if [ $? -eq 0 ]; then
+                    tmux kill-session -t karin 2>/dev/null
+                    tmux new-session -s karin 'bash -c "while true; do pm2 kill; npx karin .; done"'
+                fi
+            fi
+}
+function plugin_list() {
+  while true; do
+    CHOICE=$(dialog \
+      --clear \
+      --backtitle "作者: 瑜笙  $CURRENT_DATETIME" \
+      --title "Karin 插件管理菜单" \
+      --menu "请选择安装插件" \
+      25 35 5 \
+      1 "karin-plugin-basic                  基础插件" \
+      2 "karin-plugin-group                  群管插件" \
+      3 "karin-plugin-manage                  Karin管理面板" \
+      4 "退出" \
+      3>&1 1>&2 2>&3)
+    case $CHOICE in
+      1) plugins_url karin-plugin-basic "$URL/KarinJS/karin-plugin-basic" ;;
+      2) plugins_url karin-plugin-group "$URL/Circle-money-run/karin-plugin-group" ;;
+      3) plugins_url karin-plugin-manage "$URL/HalcyonAlcedo/karin-plugin-manage" ;;
+      4) menu ;;
+      *) ;;
+    esac
+  done
+}
+plugins_url() {
+    plugin_name="$1"
+    plugin_url="$2"
+    while true; do
+    CHOICE=$(dialog \
+      --clear \
+      --backtitle "作者: 瑜笙  $CURRENT_DATETIME" \
+      --title "Karin 插件管理菜单" \
+      --menu "插件:$plugin_name" \
+      25 35 5 \
+      1 "Github安装(国外推荐)" \
+      2 "ghproxy安装(国内推荐)" \
+      3 "退出" \
+      3>&1 1>&2 2>&3)
+
+    case $CHOICE in
+      1) install_plugin "$plugin_url" ;;
+      2) install_plugin "$GHURL/$plugin_url" ;;
+      3) plugin_list ;;
+      *) ;;
+    esac
+  done
+}
+install_plugin() {
+  Git_url="$1"
+  dialog --title "Karin 插件安装菜单" \
+         --yesno "确认安装插件？
+插件名字: $plugin_name
+插件链接: $Git_url" 10 50 \
+         2>&1 > /dev/tty
+  if [ $? -eq 0 ]; then
+    if [ -d "plugins/$plugin_name" ] && [ ! -z "$(ls -A "plugins/$plugin_name")" ]; then
+      dialog --title "Karin 插件安装菜单" \
+             --yesno "插件$plugin_name已经安装，是否覆盖安装" 6 40 \
+             2>&1 > /dev/tty
+      if [ $? -eq 0 ]; then
+        rm -rf plugins/$plugin_name && git clone --depth=1 "$Git_url" "./plugins/$plugin_name"
+      fi
+    else
+      git clone --depth=1 "$Git_url" "./plugins/$plugin_name"
+      cd plugins/$plugin_name && pnpm install -P
+    fi
+  fi
+}
+delete_plugin() {
+BACKTITLE="插件列表"
+TITLE="已安装插件"
+MENU="请选择需要删除的插件:"
+if [ -z "$(ls -A "plugins")" ]; then
+dialog \
+                --clear \
+                --backtitle "作者: 瑜笙  $CURRENT_DATETIME" \
+                --title "错误" \
+                --msgbox "当前未安装插件" \
+                6 40
+else
+while true; do
+    Plugins=($(ls "plugins/"))
+
+    Plugin=()
+    for ((i=0; i<${#Plugins[@]}; i++)); do
+        Plugin+=("$i" "${Plugins[$i]}")
+    done
+
+    Plugins_list=$(dialog --clear \
+                    --backtitle "$BACKTITLE" \
+                    --title "$TITLE" \
+                    --menu "$MENU" \
+                    15 40 4 \
+                    "${Plugin[@]}" \
+                    3>&1 1>&2 2>&3)
+
+    if [[ -z "$Plugins_list" ]]; then
+        exit
+    fi
+        Plugins_name="${Plugins[$Plugins_list]}"
+        rm -rf plugins/$Plugins_name
+        if [ -z "$(ls -A "plugins/$Plugins_name")" ]; then
+        dialog \
+                --clear \
+                --backtitle "作者: 瑜笙  $CURRENT_DATETIME" \
+                --title "Karin 插件管理" \
+                --msgbox "$Plugins_name插件卸载成功" \
+                6 40
+        break
+        else
+        dialog \
+                --clear \
+                --backtitle "作者: 瑜笙  $CURRENT_DATETIME" \
+                --title "Karin 插件管理" \
+                --msgbox "卸载失败 请手动卸载" \
+                6 40
+                exit
+        fi
+done
+fi
+}
+delete_plugin_js() {
+if [ -z "$(ls -A "plugins/karin-plugin-example")" ]; then
+dialog \
+                --clear \
+                --backtitle "作者: 瑜笙  $CURRENT_DATETIME" \
+                --title "错误" \
+                --msgbox "当前未安装JS插件" \
+                6 40
+else
+while true; do
+    Plugins=($(ls "plugins/karin-plugin-example/"))
+
+    Plugin=()
+    for ((i=0; i<${#Plugins[@]}; i++)); do
+        Plugin+=("$i" "${Plugins[$i]}")
+    done
+
+    Plugins_list=$(dialog --clear \
+                    --backtitle "作者: 瑜笙  $CURRENT_DATETIME" \
+                    --title "Karin 插件管理" \
+                    --menu "请选择需要删除的JS插件:" \
+                    15 40 4 \
+                    "${Plugin[@]}" \
+                    3>&1 1>&2 2>&3)
+
+    if [[ -z "$Plugins_list" ]]; then
+ 
