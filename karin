@@ -251,4 +251,28 @@ while true; do
                     3>&1 1>&2 2>&3)
 
     if [[ -z "$Plugins_list" ]]; then
- 
+        exit
+    fi
+        Plugins_name="${Plugins[$Plugins_list]}"
+        rm -rf plugins/$Plugins_name
+        if [ -z "$(ls -A "plugins/karin-plugin-example/$Plugins_name")" ]; then
+        dialog \
+                --clear \
+                --backtitle "作者: 瑜笙  $CURRENT_DATETIME" \
+                --title "Karin 插件管理" \
+                --msgbox "$Plugins_name插件卸载成功" \
+                6 40
+        break
+        else
+        dialog \
+                --clear \
+                --backtitle "作者: 瑜笙  $CURRENT_DATETIME" \
+                --title "Karin 插件管理" \
+                --msgbox "卸载失败 请手动卸载" \
+                6 40
+                exit
+        fi
+done
+fi
+}
+menu
