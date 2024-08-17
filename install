@@ -67,7 +67,7 @@ read -p "请输入一个目录用作安装目录 (默认安装到 /root目录下
 install_dir=${install_dir:-/root}
 
 if [ -d "$install_dir/Karin" ] && [ -f "$install_dir/Karin/package.json" ]; then
-  read -p "当前目录已安装Karin，是否直接启动(Yes/no): " start_choice
+  read -p "当前目录已安装Karin，是否直接启动(Yes/no): " start_choice </dev/tty
   start_choice=${start_choice:-Yes}
   if [[ "$start_choice" =~ ^[Yy](es)?$ ]]; then
     curl -o "$install_dir/Karin.sh" https://install.karin.fun/karin
@@ -76,7 +76,7 @@ if [ -d "$install_dir/Karin" ] && [ -f "$install_dir/Karin/package.json" ]; then
     echo "Karin管理脚本已安装完毕，快捷键为 y。"
     exit 0
   else
-    read -p "是否覆盖安装(Yes/no): " overwrite_choice
+    read -p "是否覆盖安装(Yes/no): " overwrite_choice </dev/tty
     overwrite_choice=${overwrite_choice:-Yes}
     if [[ "$overwrite_choice" =~ ^[Yy](es)?$ ]]; then
       rm -rf "$install_dir/Karin"
