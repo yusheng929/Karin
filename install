@@ -43,11 +43,18 @@ install_nodejs_from_official() {
   echo "Node.js 安装完成。"
 }
 
-dependencies=("wget" "git" "pm2" "fonts-wqy*" "ffmpeg" "dialog")
+dependencies=("wget" "git" "ffmpeg" "dialog")
 
 for dep in "${dependencies[@]}"; do
   check_command $dep || install_package $dep
 done
+
+if fc-list | grep -q "WenQuanYi"; then
+  echo "字体已安装，跳过安装。"
+else
+  echo "字体未安装，开始安装..."
+  install_package "fonts-wqy*"
+fi
 
 if command -v node &> /dev/null; then
   NODE_VERSION=$(node -v | grep -oP 'v\K[0-9]+')
@@ -61,6 +68,22 @@ if command -v node &> /dev/null; then
 else
   echo "Node.js 未安装，开始从官网安装..."
   install_nodejs_from_official
+fi
+
+if pnpm -v &> /dev/null; then
+  echo "pnpm 已安装，跳过安装。"
+else
+  echo "pnpm 未安装，使用 npm 安装..."
+  npm install pnpm -g
+  echo "pnpm 安装完成。"
+fi
+
+if pm2 -v &> /dev/null; then
+  echo "pm2 已安装，跳过安装。"
+else
+  echo "pm2 未安装，使用 pnpm 全局安装..."
+  pnpm add -g pm2
+  echo "pm2 安装完成。"
 fi
 
 read -p "请输入一个目录用作安装目录 (默认安装到 /root目录下): " install_dir </dev/tty
