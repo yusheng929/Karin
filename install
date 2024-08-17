@@ -82,7 +82,7 @@ if pm2 -v &> /dev/null; then
   echo "pm2 已安装，跳过安装。"
 else
   echo "pm2 未安装，使用 pnpm 全局安装..."
-  pnpm install pm2 -g
+  npm install pm2 -g
   echo "pm2 安装完成。"
 fi
 
