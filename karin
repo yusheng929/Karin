@@ -16,7 +16,8 @@ function menu() {
       3 "打开 Karin" \
       4 "打开 puppeteer 菜单" \
       5 "插件管理" \
-      6 "退出" \
+      6 "更新脚本" \
+      7 "退出" \
       3>&1 1>&2 2>&3)
 
     case $CHOICE in
@@ -25,7 +26,8 @@ function menu() {
       3) open_karin ;;
       4) puppeteer_menu ;;
       5) plugins_menu ;;
-      6) exit 0 ;;
+      6) update_sh ;;
+      7) exit 0 ;;
       *) ;;
     esac
   done
@@ -274,5 +276,19 @@ while true; do
         fi
 done
 fi
+}
+update_sh() {
+  clear
+  exec_curl=$(curl -o "Karin.sh" "https://install.karin.fun/karin" 2>&1)
+  echo "开始执行更新操作"
+  if [ $? -eq 0 ]; then
+    echo "更新完成
+脚本快捷键为: y"
+  exit 1
+  else
+   echo "更新失败，错误原因:
+$exec_curl"
+   exit 1
+  fi
 }
 menu
