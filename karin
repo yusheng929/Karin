@@ -279,8 +279,8 @@ fi
 }
 update_sh() {
   clear
-  exec_curl=$(curl -o "Karin.sh" "https://install.karin.fun/karin" 2>&1)
   echo "开始执行更新操作"
+exec_curl=$(curl -o "Karin.sh" "https://install.karin.fun/karint" 2>&1)
   if [ $? -eq 0 ]; then
     echo "更新完成
 脚本快捷键为: y"
