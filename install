@@ -38,9 +38,14 @@ install_nodejs_from_official() {
   fi
 
   wget "https://nodejs.org/dist/v20.16.0/node-v20.16.0-$NODE_DISTRO.tar.xz"
-  tar -C /usr/local --strip-components 1 -xJf "node-v20.16.0-$NODE_DISTRO.tar.xz"
+  tar -xf node-v20.16.0-linux-arm64.tar.xz
+  mv node-v20.16.0-linux-arm64 /usr/local/node
   rm "node-v20.16.0-$NODE_DISTRO.tar.xz"
-  echo "Node.js 安装完成。"
+  if node -v &> /dev/null; then
+  echo "node安装成功"
+else
+  echo "node安装失败，请自行查看是否网络问题或者环境变量问题"
+fi
 }
 
 dependencies=("wget" "git" "ffmpeg" "dialog" "tmux")
