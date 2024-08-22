@@ -15,7 +15,7 @@ install_package() {
   if command -v apt &> /dev/null; then
     apt update && apt install -y $1
   elif command -v pacman &> /dev/null; then
-    pacman -Sy --noconfirm $1
+    pacman -Syu --noconfirm $1
   else
     echo "不支持的包管理器，退出。"
     exit 1
@@ -39,12 +39,13 @@ install_nodejs_from_official() {
 
   wget "https://nodejs.org/dist/v20.16.0/node-v20.16.0-$NODE_DISTRO.tar.xz"
   tar -xf node-v20.16.0-linux-arm64.tar.xz
-  mv node-v20.16.0-linux-arm64 /usr/local/node
+  mv node-v20.16.0-linux-arm64 /usr/bin/node
   rm "node-v20.16.0-$NODE_DISTRO.tar.xz"
   if node -v &> /dev/null; then
   echo "node安装成功"
 else
   echo "node安装失败，请自行查看是否网络问题或者环境变量问题"
+  exit 1
 fi
 }
 
@@ -58,7 +59,11 @@ if fc-list | grep -q "WenQuanYi"; then
   echo "字体已安装，跳过安装。"
 else
   echo "字体未安装，开始安装..."
+  if command -v apt &> /dev/null; then
   install_package "fonts-wqy*"
+  else
+  install_package "wqy-microhei"
+  fi
 fi
 
 if command -v node &> /dev/null; then
@@ -79,16 +84,19 @@ if pnpm -v &> /dev/null; then
   echo "pnpm 已安装，跳过安装。"
 else
   echo "pnpm 未安装，使用 npm 安装..."
-  npm install pnpm -g
-  echo "pnpm 安装完成。"
+  npm install pnpm -g; echo "安装完成" || { echo "安装失败，正在尝试淘宝源下载"; npm config set registry https://registry.npmmirror.com; npm install pnpm -g || { echo "安装失败"; exit 1; } }
 fi
 
 if pm2 -v &> /dev/null; then
   echo "pm2 已安装，跳过安装。"
 else
-  echo "pm2 未安装，使用 pnpm 全局安装..."
-  npm install pm2 -g
+  echo "pm2 未安装，使用 npm 全局安装..."
+  if npm install pm2 -g; then
   echo "pm2 安装完成。"
+  else
+   echo "pm2 安装失败。"
+   exit 1
+   fi
 fi
 
 read -p "请输入一个目录用作安装目录 (默认安装到 /root目录下): " install_dir </dev/tty
