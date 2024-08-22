@@ -1,0 +1,108 @@
+echo "开始更新依赖..."
+
+check_command() {
+  if ! command -v $1 &> /dev/null
+  then
+    echo "$1 未安装。"
+    return 1
+  else
+    echo "$1 已安装，跳过。"
+    return 0
+  fi
+}
+
+install_package() {
+  if command -v apt &> /dev/null; then
+    apt update && apt install -y $1
+  elif command -v pacman &> /dev/null; then
+    pacman -Syu --noconfirm $1
+  else
+    echo "不支持的包管理器，退出。"
+    exit 1
+  fi
+  echo "$1 安装完成。"
+}
+
+install_nodejs_from_official() {
+  echo "开始从官网安装 Node.js..."
+  ARCH=$(uname -m)
+  NODE_VERSION="18.x"
+
+  if [ "$ARCH" = "x86_64" ]; then
+    NODE_DISTRO="linux-x64"
+  elif [ "$ARCH" = "aarch64" ]; then
+    NODE_DISTRO="linux-arm64"
+  else
+    echo "不支持的架构: $ARCH"
+    exit 1
+  fi
+
+  wget "https://nodejs.org/dist/v20.16.0/node-v20.16.0-$NODE_DISTRO.tar.xz"
+  tar -xf node-v20.16.0-linux-arm64.tar.xz
+  mv node-v20.16.0-linux-arm64 /usr/bin/node
+  rm "node-v20.16.0-$NODE_DISTRO.tar.xz"
+  if node -v &> /dev/null; then
+  echo "node安装成功"
+else
+  echo "node安装失败，请自行查看是否网络问题或者环境变量问题"
+  exit 1
+fi
+}
+
+dependencies=("wget" "git" "ffmpeg" "dialog" "tmux")
+
+for dep in "${dependencies[@]}"; do
+  check_command $dep || install_package $dep
+done
+
+if fc-list | grep -q "WenQuanYi"; then
+  echo "字体已安装，跳过安装。"
+else
+  echo "字体未安装，开始安装..."
+  if command -v apt &> /dev/null; then
+  install_package "fonts-wqy*"
+  else
+  install_package "wqy-microhei"
+  fi
+fi
+
+if command -v node &> /dev/null; then
+  NODE_VERSION=$(node -v | grep -oP 'v\K[0-9]+')
+  if [ "$NODE_VERSION" -lt 18 ]; then
+    echo "Node.js 版本小于 18，开始更新..."
+    apt-get remove -y nodejs || pacman -R nodejs --noconfirm
+    install_nodejs_from_official
+  else
+    echo "Node.js 版本符合要求，跳过更新。"
+  fi
+else
+  echo "Node.js 未安装，开始从官网安装..."
+  install_nodejs_from_official
+fi
+
+if pnpm -v &> /dev/null; then
+  echo "pnpm 已安装，跳过安装。"
+else
+  echo "pnpm 未安装，使用 npm 安装..."
+  npm install pnpm -g; echo "安装完成" || { echo "安装失败，正在尝试淘宝源下载"; npm config set registry https://registry.npmmirror.com; npm install pnpm -g || { echo "安装失败"; exit 1; } }
+fi
+
+if pm2 -v &> /dev/null; then
+  echo "pm2 已安装，跳过安装。"
+else
+  echo "pm2 未安装，使用 npm 全局安装..."
+  if npm install pm2 -g; then
+  echo "pm2 安装完成。"
+  else
+   echo "pm2 安装失败。"
+   exit 1
+   fi
+fi
+ if npx karin up; then
+   echo "更新完成
+脚本快捷键为: y"
+  exit 0
+  else 
+  echo "更新失败，请自行更新"
+  exit 1
+fi
